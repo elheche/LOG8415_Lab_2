@@ -15,5 +15,8 @@ sudo jar cf wc.jar WordCount*.class
 hdfs dfs -mkdir input
 sudo curl -LO --compressed http://www.gutenberg.org/cache/epub/4300/pg4300.txt
 hdfs dfs -copyFromLocal pg4300.txt input
-time hadoop jar wc.jar WordCount input output
-time cat pg4300.txt | tr -c "[:graph:]" "\n" | sort | uniq -c
+touch time.txt
+printf "WordCount execution time on Hadoop:" | sudo tee -a time.txt >/dev/null
+(time (hadoop jar wc.jar WordCount input output &>/dev/null)) &>> time.txt
+printf "\nLinux commands execution time (calculate word frequency):" | sudo tee -a time.txt >/dev/null
+(time (cat pg4300.txt | tr -c "[:graph:]" "\n" | sort | uniq -c &>/dev/null)) &>> time.txt
