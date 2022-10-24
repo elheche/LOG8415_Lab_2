@@ -239,3 +239,23 @@ def wait_until_all_ec2_instances_are_terminated(ec2: EC2Client, instance_ids: li
         sys.exit(1)
     else:
         print('All EC2 instances are now terminated.')
+
+
+def get_ec2_instance_public_ipv4_address(ec2: EC2Client, ec2_instance_id: str) -> str:
+    try:
+        print('Getting ec2 instance public ipv4 address...')
+        response = ec2.describe_instances(
+            Filters=[
+                {
+                    'Name': 'instance-id',
+                    'Values': [ec2_instance_id],
+                }
+            ]
+        )
+    except Exception as e:
+        print(e)
+        sys.exit(1)
+    else:
+        ec2_instance_public_ipv4_address = response['Reservations'][0]['Instances'][0]['PublicIpAddress']
+        print(f'EC2 instance public ipv4 address obtained successfully.\n{ec2_instance_public_ipv4_address}')
+        return ec2_instance_public_ipv4_address
