@@ -96,6 +96,12 @@ def main() -> None:
     # Wait until all ec2 instance state pass to 'running'
     wait_until_all_ec2_instance_are_running(ec2, [ec2_instance_id])
 
+    # Get ec2 instance public ipv4 address
+    ec2_instance_public_ipv4_address = get_ec2_instance_public_ipv4_address(ec2, ec2_instance_id)
+
+    # Save ec2 instance public ipv4 address to aws_data (needed to connect to it via ssh)
+    aws_data['EC2InstancePublicIPv4Address'] = ec2_instance_public_ipv4_address
+
     # Export aws_data to aws_data.json file (needed to execute -r/--reset command)
     save_aws_data(aws_data, 'aws_data.json')
 
