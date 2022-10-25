@@ -5,7 +5,7 @@ from ec2 import *
 from init_aws_service import *
 from s3 import *
 import sys
-
+from ssh_run_command import *
 
 def main() -> None:
     ###################################################################################################################
@@ -104,6 +104,13 @@ def main() -> None:
 
     # Export aws_data to aws_data.json file (needed to execute -r/--reset command)
     save_aws_data(aws_data, 'aws_data.json')
+
+
+###################################################################################################################
+#                                    Running command via SSH
+###################################################################################################################
+
+   # run_command()
 
 
 def save_aws_data(aws_data: dict, path: str) -> None:
