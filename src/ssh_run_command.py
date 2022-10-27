@@ -2,6 +2,41 @@ import time
 import boto3
 import jmespath
 import paramiko
+import shutil
+import os
+
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))  # This is your Project Root
+
+FILE_NAME = "wordcount"
+PATH = os.path.join(ROOT_DIR, FILE_NAME)
+TO_RUN = 'setup.sh'
+ZIP_FILE = shutil.make_archive(FILE_NAME, 'zip', FILE_NAME)
+ZIP_FILE_NAME = FILE_NAME + '.zip'
+KEY_SOURCE = 'ec2_keypair.pem'
+KEY_DESTINATION = 'wordcount/'
+
+
+def copy_key_pair() -> None:
+    try:
+        shutil.copy(KEY_SOURCE, KEY_DESTINATION)
+        print("File copied successfully.")
+        time.sleep(5)
+
+    # If source and destination are same
+    except shutil.SameFileError:
+        print("Source and destination represents the same file.")
+
+    # If destination is a directory.
+    except IsADirectoryError:
+        print("Destination is a directory.")
+
+    # If there is any permission issue
+    except PermissionError:
+        print("Permission denied.")
+
+    # For other errors
+    except Exception as e:
+        print("Error occurred while copying file.{}".format(e))
 
 
 def get_all_instance_ip() -> int:
@@ -31,6 +66,9 @@ def ssh_connexion(ssh, instance_ip, retries) -> None:
         print('SSH into the instance: {}'.format(instance_ip))
         ssh.connect(hostname=instance_ip,
                     username='ubuntu', pkey=privkey)
+        sftp = ssh.open_sftp()
+        # Upload zip file
+        upload = sftp.put(ZIP_FILE, '/home/ubuntu/' + ZIP_FILE_NAME)
         return True
     except Exception as e:
         print(e)
@@ -40,23 +78,21 @@ def ssh_connexion(ssh, instance_ip, retries) -> None:
 
 
 def run_command() -> None:
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    copy_key_pair()
+    c = paramiko.SSHClient()
+    c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     public_ip = get_all_instance_ip()
-    ssh_connexion(ssh, public_ip, 0)
+    ssh_connexion(c, public_ip, 0)
     commands = [
-        "git clone https://github.com/foalem/WordCount.git",
-        "chmod u+x WordCount/setup.sh",
-        # "sed -i -e 's/\r$//' /WordCount/setup.sh",
-        "Cd /WordCount"
-        "/setup.sh"
-    ]
+        'sudo apt-get update -y',
+        'sudo apt install unzip',
+        'unzip -o ' + FILE_NAME,
+        'bash sample.sh',
+        'chmod u+x ./' + TO_RUN,
+        './' + TO_RUN,
+        'sudo scp -i ec2_keypair.pem ubuntu@' + str(get_all_instance_ip()) + ':/home/ubuntu/time.txt .src/wordcount']
     for command in commands:
         print("running command: {}".format(command))
-        stdin, stdout, stderr = ssh.exec_command(command)
+        stdin, stdout, stderr = c.exec_command(command)
         print('stdout:', stdout.read())
         print('stderr:', stderr.read())
-
-
-if __name__ == "__main__":
-    run_command()

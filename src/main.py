@@ -110,7 +110,7 @@ def main() -> None:
 #                                    Running command via SSH
 ###################################################################################################################
 
-   # run_command()
+    run_command()
 
 
 def save_aws_data(aws_data: dict, path: str) -> None:
