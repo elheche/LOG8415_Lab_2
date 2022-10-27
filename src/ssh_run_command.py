@@ -18,7 +18,7 @@ KEY_DESTINATION = 'wordcount/'
 
 def copy_key_pair() -> None:
     try:
-        shutil.copy(KEY_SOURCE, KEY_DESTINATION)
+        shutil.copy2(KEY_SOURCE, KEY_DESTINATION)
         print("File copied successfully.")
         time.sleep(5)
 
@@ -86,11 +86,12 @@ def run_command() -> None:
     commands = [
         'sudo apt-get update -y',
         'sudo apt install unzip',
-        'unzip -o ' + FILE_NAME,
+        'unzip ' + FILE_NAME,
         'bash sample.sh',
         'chmod u+x ./' + TO_RUN,
-        './' + TO_RUN,
-        'sudo scp -i ec2_keypair.pem ubuntu@' + str(get_all_instance_ip()) + ':/home/ubuntu/time.txt .src/wordcount']
+        './' + TO_RUN
+        # 'sudo scp -i ec2_keypair.pem ubuntu@' + str(get_all_instance_ip()) + ':/home/ubuntu/time.txt .src/wordcount'
+    ]
     for command in commands:
         print("running command: {}".format(command))
         stdin, stdout, stderr = c.exec_command(command)
