@@ -115,11 +115,14 @@ public class FriendSocialNetwork {
 
   public static void main(String[] args) throws Exception {
     Configuration conf = new Configuration();
-    Job job = Job.getInstance(conf, "word count");
-    job.setJarByClass(WordCount.class);
-    job.setMapperClass(TokenizerMapper.class);
-    job.setCombinerClass(IntSumReducer.class);
-    job.setReducerClass(IntSumReducer.class);
+    Job job = Job.getInstance(conf, "friend social network");
+    job.setJarByClass(FriendSocialNetwork.class);
+    job.setMapperClass(GraphMapper.class);
+    System.out.println("******************* mapper done **********************************");
+    job.setCombinerClass(SumReducer.class);
+    System.out.println("******************* combiner done **********************************");
+    job.setReducerClass(SumReducer.class);
+    System.out.println("******************* reducer done **********************************");
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(Text.class);
     FileInputFormat.addInputPath(job, new Path(args[0]));
