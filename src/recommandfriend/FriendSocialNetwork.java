@@ -58,19 +58,58 @@ public class FriendSocialNetwork {
     }
   }
 
-  public static class IntSumReducer
+  public static class SumReducer
        extends Reducer<Text,Text,Text,Text> {
     private Text result = new Text();
 
     public void reduce(Text key, Iterable<Text> values,
                        Context context
                        ) throws IOException, InterruptedException {
-      /*int sum = 0;
+
+      Hashtable<String, Integer> mutualFriendsDict = new Hashtable<String, Integer>();
       for (Text val : values) {
-        sum += val.get();
+        String[] elements = val.toString().split("_");
+        System.out.println("the input value is " + val.toString() + "|");
+        if (elements.length > 1){
+            System.out.println(elements[0]);
+            System.out.println(elements[1]);
+            String friendTwo = elements[0];
+            int relationship = Integer.parseInt(elements[1]);
+            if (mutualFriendsDict.containsKey(friendTwo)){
+                int count = mutualFriendsDict.get(friendTwo);
+                if (relationship == 0){
+                    mutualFriendsDict.put(friendTwo, 0);
+                }
+                else if ((relationship == 1) && (count != 0)) {
+                    mutualFriendsDict.put(friendTwo, count + 1);
+                }
+            } else {
+                mutualFriendsDict.put(friendTwo, relationship);
+            }
+        }
       }
-      result.set(sum);*/
-      context.write(key, new Text("Test"));
+
+      //get all the entries from the hashtable and put it in a List
+      List<Map.Entry<String, Integer>> list = new ArrayList<Entry<String, Integer>>(mutualFriendsDict.entrySet());
+      //sort the entries based on the value by custom Comparator
+      Collections.sort(list, new Comparator<Map.Entry<String, Integer>>(){
+        public int compare(Entry<String, Integer> entry1, Entry<String, Integer> entry2) {
+            return entry1.getValue().compareTo( entry2.getValue());
+        }
+      });
+
+      //put all sorted entries in LinkedHashMap
+      String output = "\t";
+      for( Map.Entry<String, Integer> entry : list){
+        if (entry.getValue() != 0){
+            output = output + entry.getKey() + "(" + entry.getValue().toString() + "),";
+        } else {
+            break;
+        }
+      }
+
+      result = new Text(output);
+      context.write(key, result);
     }
   }
 
