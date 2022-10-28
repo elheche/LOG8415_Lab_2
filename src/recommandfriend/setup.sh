@@ -25,3 +25,24 @@ echo "export JAVA_HOME=/usr/lib/jvm/default-java" | sudo tee -a /usr/local/hadoo
 echo "export HADOOP_HOME=/usr/local/hadoop-3.3.4" | sudo tee -a /usr/local/hadoop-3.3.4/etc/hadoop/hadoop-env.sh >/dev/null
 source ~/.profile
 echo "Done."
+
+echo "Compiling FriendSocialNetwork.java..."
+hadoop com.sun.tools.javac.Main FriendSocialNetwork.java
+sudo jar cf fsn.jar FriendSocialNetwork*.class
+echo "Done."
+
+echo "Creating input directory..."
+hdfs dfs -mkdir input
+echo "Done."
+
+echo "Creating data directory..."
+mkdir data
+cp test.txt data
+echo "Done."
+
+echo "Copying datasets from data to input directory..."
+hdfs dfs -copyFromLocal data/* input
+echo "Done."
+
+echo "Running FriendSocialNetwork on Hadoop vs Linux..."
+hadoop jar fsn.jar FriendSocialNetwork ./input/test.txt output &>/dev/null
