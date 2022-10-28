@@ -58,4 +58,34 @@ public class FriendSocialNetwork {
     }
   }
 
+  public static class IntSumReducer
+       extends Reducer<Text,Text,Text,Text> {
+    private Text result = new Text();
+
+    public void reduce(Text key, Iterable<Text> values,
+                       Context context
+                       ) throws IOException, InterruptedException {
+      /*int sum = 0;
+      for (Text val : values) {
+        sum += val.get();
+      }
+      result.set(sum);*/
+      context.write(key, new Text("Test"));
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Configuration conf = new Configuration();
+    Job job = Job.getInstance(conf, "word count");
+    job.setJarByClass(WordCount.class);
+    job.setMapperClass(TokenizerMapper.class);
+    job.setCombinerClass(IntSumReducer.class);
+    job.setReducerClass(IntSumReducer.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(Text.class);
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    System.exit(job.waitForCompletion(true) ? 0 : 1);
+  }
+
 }
