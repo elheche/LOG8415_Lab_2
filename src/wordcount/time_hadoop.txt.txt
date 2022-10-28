@@ -1,0 +1,120 @@
+./input/buchanj-midwinter-00-t.txt
+real    0m4.821s
+user    0m8.006s
+sys     0m0.365s
+./input/carman-farhorizons-00-t.txt
+real    0m3.830s
+user    0m6.667s
+sys     0m0.351s
+./input/charlesworth-scene-00-t.txt
+real    0m4.841s
+user    0m7.086s
+sys     0m0.379s
+./input/cheyneyp-darkbahama-00-t.txt
+real    0m4.794s
+user    0m7.239s
+sys     0m0.334s
+./input/colby-champlain-00-t.txt
+real    0m3.854s
+user    0m7.017s
+sys     0m0.338s
+./input/delamare-bumps-00-t.txt
+real    0m3.724s
+user    0m6.281s
+sys     0m0.395s
+./input/delamare-lucy-00-t.txt
+real    0m3.851s
+user    0m6.611s
+sys     0m0.280s
+./input/delamare-myfanwy-00-t.txt
+real    0m3.991s
+user    0m6.760s
+sys     0m0.453s
+./input/delamare-penny-00-t.txt
+real    0m3.751s
+user    0m6.517s
+sys     0m0.389s
+./input/pg4300.txt
+real    0m5.787s
+user    0m9.784s
+sys     0m0.363s
+./input/buchanj-midwinter-00-t.txt
+real    0m4.884s
+user    0m7.717s
+sys     0m0.424s
+./input/carman-farhorizons-00-t.txt
+real    0m4.004s
+user    0m6.829s
+sys     0m0.405s
+./input/charlesworth-scene-00-t.txt
+real    0m4.952s
+user    0m7.147s
+sys     0m0.342s
+./input/cheyneyp-darkbahama-00-t.txt
+real    0m4.743s
+user    0m7.107s
+sys     0m0.378s
+./input/colby-champlain-00-t.txt
+real    0m3.772s
+user    0m6.788s
+sys     0m0.340s
+./input/delamare-bumps-00-t.txt
+real    0m3.827s
+user    0m6.788s
+sys     0m0.301s
+./input/delamare-lucy-00-t.txt
+real    0m3.878s
+user    0m6.672s
+sys     0m0.344s
+./input/delamare-myfanwy-00-t.txt
+real    0m3.896s
+user    0m6.773s
+sys     0m0.394s
+./input/delamare-penny-00-t.txt
+real    0m3.833s
+user    0m6.505s
+sys     0m0.360s
+./input/pg4300.txt
+real    0m5.838s
+user    0m9.367s
+sys     0m0.375s
+./input/buchanj-midwinter-00-t.txt
+real    0m4.749s
+user    0m7.340s
+sys     0m0.360s
+./input/carman-farhorizons-00-t.txt
+real    0m3.976s
+user    0m7.092s
+sys     0m0.332s
+./input/charlesworth-scene-00-t.txt
+real    0m4.768s
+user    0m6.953s
+sys     0m0.362s
+./input/cheyneyp-darkbahama-00-t.txt
+real    0m4.885s
+user    0m7.470s
+sys     0m0.381s
+./input/colby-champlain-00-t.txt
+real    0m3.752s
+user    0m6.673s
+sys     0m0.406s
+./input/delamare-bumps-00-t.txt
+real    0m3.890s
+user    0m6.855s
+sys     0m0.350s
+./input/delamare-lucy-00-t.txt
+real    0m3.736s
+user    0m6.483s
+sys     0m0.254s
+./input/delamare-myfanwy-00-t.txt
+real    0m3.950s
+user    0m6.970s
+sys     0m0.379s
+./input/delamare-penny-00-t.txt
+real    0m3.896s
+user    0m6.648s
+sys     0m0.332s
+./input/pg4300.txt
+real    0m5.888s
+user    0m10.063s
+sys     0m0.410s
