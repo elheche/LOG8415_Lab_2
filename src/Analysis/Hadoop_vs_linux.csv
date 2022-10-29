@@ -1,0 +1,7 @@
+System,Type of time,Time(S)
+Hadoop,real_time,6.070
+Hadoop,user_time,9.848
+Hadoop,sys_time,0.565
+Linux,real_time,0.376
+Linux,user_time,0.422
+Linux,sys_time,0.015

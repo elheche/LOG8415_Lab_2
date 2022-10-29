@@ -67,42 +67,24 @@ echo "Done."
 echo "Creating time.txt file..."
 touch time_linux.txt
 touch time_hadoop.txt
+touch time_hadoop_vs_linux.txt
 touch time_spark.txt
 echo "Done."
 
-#echo "Running WordCount on Hadoop vs Linux..."
-#printf "############################################\n" | sudo tee -a time.txt >/dev/null
-#printf "WordCount execution time on Hadoop vs Linux\n" | sudo tee -a time.txt >/dev/null
-#printf "############################################\n" | sudo tee -a time.txt >/dev/null
-#printf -- "--------------------------------------------\n" | sudo tee -a time.txt >/dev/null
-#printf "Hadoop:\n" | sudo tee -a time.txt >/dev/null
-#printf -- "--------------------------------------------" | sudo tee -a time.txt >/dev/null
-#(time (hadoop jar wc.jar WordCount ./input/pg4300.txt output &>/dev/null)) &>> time.txt
-#printf -- "--------------------------------------------\n" | sudo tee -a time.txt >/dev/null
-#printf "Linux:\n" | sudo tee -a time.txt >/dev/null
-#printf -- "--------------------------------------------\n" | sudo tee -a time.txt >/dev/null
-#(time (cat ./input/pg4300.txt | tr -c "[:graph:]" "\n" | sort | uniq -c &>/dev/null)) &>> time.txt
-#echo "Done."
-
-
-echo "Running WordCount on Linux..."
-printf "############################################\n" >/dev/null
-printf "WordCount execution time on Linux\n"  >/dev/null
+echo "Running WordCount on Hadoop vs Linux..."
 printf "############################################\n"  >/dev/null
-for ((i = 1; i <= 3; i++)); do
-    echo "Running test #$i..."
-    printf -- "*******************\n"  >/dev/null
-    printf "Test: #%s\n" "$i"  >/dev/null
-    printf -- "*******************\n"  >/dev/null
-    for dataset in ./input/*.txt; do
-        hdfs dfs -rm -r output &>/dev/null
-        printf -- "--------------------------------------------\n"  >/dev/null
-        printf "%s" "$dataset" | sudo tee -a time_linux.txt >/dev/null
-        printf -- "--------------------------------------------"  >/dev/null
-        (time (cat ./"$dataset" | tr -c "[:graph:]" "\n" | sort | uniq -c &>/dev/null)) &>> time_linux.txt
-    done
-done
+printf "WordCount execution time on Hadoop vs Linux\n" >/dev/null
+printf "############################################\n"  >/dev/null
+printf -- "--------------------------------------------\n"  >/dev/null
+printf "Hadoop:\n"  >/dev/null
+printf -- "--------------------------------------------"  >/dev/null
+(time (hadoop jar wc.jar WordCount ./input/pg4300.txt output &>/dev/null)) &>> time_hadoop_vs_linux.txt
+printf -- "--------------------------------------------\n"  >/dev/null
+printf "Linux:\n"  >/dev/null
+printf -- "--------------------------------------------\n"  >/dev/null
+(time (cat ./input/pg4300.txt | tr -c "[:graph:]" "\n" | sort | uniq -c &>/dev/null)) &>> time_linux.txt
 echo "Done."
+
 
 echo "Running WordCount on Hadoop..."
 printf "############################################\n"  >/dev/null
