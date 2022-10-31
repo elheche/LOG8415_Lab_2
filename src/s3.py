@@ -6,6 +6,12 @@ from mypy_boto3_s3 import S3Client
 
 
 def create_bucket(s3: S3Client, bucket: str) -> str:
+    """
+    Creates an AWS S3 bucket
+    :param s3: the S3Client object
+    :param bucket: the name of the bucket
+    :return: the bucket name
+    """
     timestamp = str(int(datetime.timestamp(datetime.now())))
     try:
         print('Creating an S3 bucket...')
@@ -20,6 +26,15 @@ def create_bucket(s3: S3Client, bucket: str) -> str:
 
 
 def put_bucket_policy(s3: S3Client, s3_config: dict, bucket: str, aws_user_account: str, role_arn) -> None:
+    """
+    Put the policy to the AWS S3 bucket
+    :param s3: the S3Client object
+    :param s3_config: The configuration of the S3 bucket
+    :param bucket: the S3 bucket name
+    :param aws_user_account:  The user account name
+    :param role_arn: The role of the user
+    :return:
+    """
     bucket_policy = s3_config['BucketPolicy']
     bucket_policy['Statement'][0]['Principal'] = {"AWS": [aws_user_account]}
     bucket_policy['Statement'][0]['Resource'] = f'arn:aws:s3:::{bucket}/*'
@@ -39,6 +54,11 @@ def put_bucket_policy(s3: S3Client, s3_config: dict, bucket: str, aws_user_accou
 
 
 def upload_server_app_to_s3_bucket(s3: S3Client, bucket: str) -> None:
+    """
+    Uploads an application (compressed in a zip file) to the S3 bucket
+    :param s3: the S3Client object
+    :param bucket: the S3 bucket name
+    """
     try:
         print('Uploading a server app to an S3 Bucket...')
         shutil.make_archive('server', 'zip', './server')
@@ -51,6 +71,11 @@ def upload_server_app_to_s3_bucket(s3: S3Client, bucket: str) -> None:
 
 
 def delete_server_app_from_s3_bucket(s3: S3Client, bucket: str) -> None:
+    """
+    Deletes the application from the S3 bucket
+    :param s3: the S3Client object
+    :param bucket: the S3 bucket name
+    """
     try:
         print('Deleting a server app from an S3 Bucket...')
         s3.delete_object(Bucket=bucket, Key='server.zip')
@@ -62,6 +87,11 @@ def delete_server_app_from_s3_bucket(s3: S3Client, bucket: str) -> None:
 
 
 def delete_bucket(s3: S3Client, bucket: str) -> None:
+    """
+    Deletes the S3 bucket
+    :param s3: the S3Client object
+    :param bucket: the S3 bucket name
+    """
     try:
         print('Deleting an S3 bucket...')
         s3.delete_bucket(Bucket=bucket)

@@ -11,6 +11,15 @@ def create_aws_service(
         aws_secret_access_key: str = None,
         aws_session_token: str = None
 ):
+    """
+    This function creates the AWS service
+    :param aws_service_name: The name of the service
+    :param aws_region_name: The region name
+    :param aws_access_key_id: The AWS client access key
+    :param aws_secret_access_key: The AWS client secret key value
+    :param aws_session_token: The AWS client session token value
+    :return: The AWS service created
+    """
     try:
         print(f'Creating {aws_service_name} service...')
         aws_service = boto3.client(

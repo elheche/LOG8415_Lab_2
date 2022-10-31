@@ -8,6 +8,10 @@ import sys
 from ssh_run_command import *
 
 def main() -> None:
+    """
+    This function runs the whole experience : Creates and configures the AWS EC2 instances and runs the map reduce experiences
+    (WordCount and Social network)
+    """
     ###################################################################################################################
     #                                    Setting program arguments
     ###################################################################################################################
@@ -114,6 +118,11 @@ def main() -> None:
 
 
 def save_aws_data(aws_data: dict, path: str) -> None:
+    """
+    Saves the credentials of the AWS client for the next iterations
+    :param aws_data: The data representing the credentials necessary to connect to an AWS service
+    :param path: The path where to save the data
+    """
     try:
         print('Saving aws data...')
         with open(path, 'w') as file:
@@ -126,6 +135,11 @@ def save_aws_data(aws_data: dict, path: str) -> None:
 
 
 def load_aws_data(path: str) -> dict:
+    """
+    Loads the credentials necessary for logging to an AWS client
+    :param path: The path where to find the data
+    :return: the AWS credentials necessary for the AWS connection
+    """
     try:
         print('Loading aws data...')
         with open(path, 'r') as file:
@@ -139,6 +153,10 @@ def load_aws_data(path: str) -> dict:
 
 
 def reset(ec2: EC2Client) -> None:
+    """
+    Resets your AWS account by terminating and deleting all the lements created in the function main
+    :param ec2: The AWS EC2 client to be reset
+    """
     data_exists = Path('aws_data.json').is_file()
 
     if data_exists:
