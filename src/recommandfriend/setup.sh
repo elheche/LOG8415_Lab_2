@@ -38,6 +38,7 @@ echo "Done."
 echo "Creating data directory..."
 mkdir data
 cp test.txt data
+cp soc-LiveJournal1Adj.txt data
 echo "Done."
 
 echo "Copying datasets from data to input directory..."
@@ -46,3 +47,5 @@ echo "Done."
 
 echo "Running FriendSocialNetwork on Hadoop vs Linux..."
 hadoop jar fsn.jar FriendSocialNetwork ./input/test.txt output &>/dev/null
+hadoop jar fsn.jar FriendSocialNetwork ./input/soc-LiveJournal1Adj.txt output_2 &>/dev/null
+echo "Done."

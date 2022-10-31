@@ -42,7 +42,7 @@ public class FriendSocialNetwork {
       friendOne.set(itr.nextToken());
       while (itr.hasMoreTokens()) {
         friendTwo.set(itr.nextToken());
-        System.out.println("couple :("+ friendOne + "," + friendTwo + "_" + zero.toString() +")");
+        //System.out.println("couple :("+ friendOne + "," + friendTwo + "_" + zero.toString() +")");
         context.write(friendOne, new Text(friendTwo + "_" + zero));
         mutualFriends.add(friendTwo.toString());
       }
@@ -51,8 +51,8 @@ public class FriendSocialNetwork {
         for (int j=i+1; j < mutualFriends.size(); j++){
             context.write(new Text(mutualFriends.get(i)), new Text(mutualFriends.get(j) + "_" + one));
             context.write(new Text(mutualFriends.get(j)), new Text(mutualFriends.get(i) + "_" + one));
-            System.out.println("couple :("+ mutualFriends.get(i) + "," + mutualFriends.get(j) + "_" + one.toString() +")");
-            System.out.println("couple :("+ mutualFriends.get(j) + "," + mutualFriends.get(i) + "_" + one.toString() +")");
+            //System.out.println("couple :("+ mutualFriends.get(i) + "," + mutualFriends.get(j) + "_" + one.toString() +")");
+            //System.out.println("couple :("+ mutualFriends.get(j) + "," + mutualFriends.get(i) + "_" + one.toString() +")");
         }
       }
     }
@@ -69,10 +69,10 @@ public class FriendSocialNetwork {
       Hashtable<String, Integer> mutualFriendsDict = new Hashtable<String, Integer>();
       for (Text val : values) {
         String[] elements = val.toString().split("_");
-        System.out.println("the input value is " + val.toString() + "|");
+        //System.out.println("the input value is " + val.toString() + "|");
         if (elements.length > 1){
-            System.out.println(elements[0]);
-            System.out.println(elements[1]);
+            //System.out.println(elements[0]);
+            //System.out.println(elements[1]);
             String friendTwo = elements[0];
             int relationship = Integer.parseInt(elements[1]);
             if (mutualFriendsDict.containsKey(friendTwo)){
@@ -89,25 +89,36 @@ public class FriendSocialNetwork {
         }
       }
 
+     /*Set<Map.Entry<String, Integer>> entries = mutualFriendsDict.entrySet();
+      for(Map.Entry<String, Integer> entry : entries ){
+        System.out.println( entry.getKey() + "->" + entry.getValue() );
+      }*/
+
       //get all the entries from the hashtable and put it in a List
       List<Map.Entry<String, Integer>> list = new ArrayList<Entry<String, Integer>>(mutualFriendsDict.entrySet());
       //sort the entries based on the value by custom Comparator
       Collections.sort(list, new Comparator<Map.Entry<String, Integer>>(){
-        public int compare(Entry<String, Integer> entry1, Entry<String, Integer> entry2) {
+        public int compare(Entry<String, Integer> entry2, Entry<String, Integer> entry1) {
             return entry1.getValue().compareTo( entry2.getValue());
         }
       });
 
-      //put all sorted entries in LinkedHashMap
+      /*for(Map.Entry<String, Integer> entry : list){
+        System.out.println( entry.getKey() + "->" + entry.getValue() );
+      }*/
+
       String output = "\t";
       for( Map.Entry<String, Integer> entry : list){
         if (entry.getValue() != 0){
-            output = output + entry.getKey() + "(" + entry.getValue().toString() + "),";
+            //output = output + entry.getKey() + "(" + entry.getValue().toString() + "),";
+            output = output + entry.getKey() + ",";
         } else {
             break;
         }
       }
 
+      output = output.substring(0, output.length() - 1);
+      //System.out.println("the result is " + output + "|");
       result = new Text(output);
       context.write(key, result);
     }
@@ -118,11 +129,8 @@ public class FriendSocialNetwork {
     Job job = Job.getInstance(conf, "friend social network");
     job.setJarByClass(FriendSocialNetwork.class);
     job.setMapperClass(GraphMapper.class);
-    System.out.println("******************* mapper done **********************************");
-    job.setCombinerClass(SumReducer.class);
-    System.out.println("******************* combiner done **********************************");
+    //job.setCombinerClass(SumReducer.class);
     job.setReducerClass(SumReducer.class);
-    System.out.println("******************* reducer done **********************************");
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(Text.class);
     FileInputFormat.addInputPath(job, new Path(args[0]));
