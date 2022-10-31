@@ -16,3 +16,4 @@ types-awscrt==0.14.7
 types-s3transfer==0.6.0.post4
 typing_extensions==4.4.0
 urllib3==1.26.12
+paramiko~=2.11.0
