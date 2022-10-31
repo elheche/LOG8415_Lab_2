@@ -60,7 +60,7 @@ sudo curl -L --compressed http://www.gutenberg.ca/ebooks/delamare-myfanwy/delama
 sudo curl -L --compressed http://www.gutenberg.ca/ebooks/delamare-penny/delamare-penny-00-t.txt -o data/delamare-penny-00-t.txt 2>/dev/null
 echo "Done."
 
-echo "Copying freind social network data..."
+echo "Copying friend social network data..."
 cp soc-LiveJournal1Adj.txt data
 echo "Done."
 

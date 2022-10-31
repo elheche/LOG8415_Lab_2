@@ -12,10 +12,6 @@ FILE_NAME_r = "recommandfriend"
 FILE_NAME = "wordcount"
 PATH = os.path.join(ROOT_DIR, FILE_NAME)
 TO_RUN = './setup.sh'
-ZIP_FILE = shutil.make_archive(FILE_NAME, 'zip', FILE_NAME)
-ZIP_FILE_r = shutil.make_archive(FILE_NAME_r, 'zip', FILE_NAME_r)
-ZIP_FILE_NAME = FILE_NAME + '.zip'
-ZIP_FILE_NAME_r = FILE_NAME_r + '.zip'
 KEY_SOURCE = 'ec2_keypair.pem'
 KEY_DESTINATION = 'wordcount/'
 KEY_DESTINATION_r = 'recommandfriend/'
@@ -98,6 +94,3 @@ def run_command() -> None:
 
     for line in iter(stdout.readline, ""):
         print(line, end="")
-
-
-
