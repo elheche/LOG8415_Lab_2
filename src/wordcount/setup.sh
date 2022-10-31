@@ -60,69 +60,88 @@ sudo curl -L --compressed http://www.gutenberg.ca/ebooks/delamare-myfanwy/delama
 sudo curl -L --compressed http://www.gutenberg.ca/ebooks/delamare-penny/delamare-penny-00-t.txt -o data/delamare-penny-00-t.txt 2>/dev/null
 echo "Done."
 
+echo "Copying freind social network data..."
+cp soc-LiveJournal1Adj.txt data
+echo "Done."
+
 echo "Copying datasets from data to input directory..."
 hdfs dfs -copyFromLocal data/* input
 echo "Done."
 
 echo "Creating time.txt file..."
-touch time_linux.txt
-touch time_hadoop.txt
-touch time_hadoop_vs_linux.txt
-touch time_spark.txt
+touch time.txt
 echo "Done."
 
 echo "Running WordCount on Hadoop vs Linux..."
-printf "############################################\n"  >/dev/null
-printf "WordCount execution time on Hadoop vs Linux\n" >/dev/null
-printf "############################################\n"  >/dev/null
-printf -- "--------------------------------------------\n"  >/dev/null
-printf "Hadoop:\n"  >/dev/null
-printf -- "--------------------------------------------"  >/dev/null
-(time (hadoop jar wc.jar WordCount ./input/pg4300.txt output &>/dev/null)) &>> time_hadoop_vs_linux.txt
-printf -- "--------------------------------------------\n"  >/dev/null
-printf "Linux:\n"  >/dev/null
-printf -- "--------------------------------------------\n"  >/dev/null
-(time (cat ./input/pg4300.txt | tr -c "[:graph:]" "\n" | sort | uniq -c &>/dev/null)) &>> time_linux.txt
+printf "############################################\n" | sudo tee -a time.txt >/dev/null
+printf "WordCount execution time on Hadoop vs Linux\n" | sudo tee -a time.txt >/dev/null
+printf "############################################\n" | sudo tee -a time.txt >/dev/null
+printf -- "--------------------------------------------\n" | sudo tee -a time.txt >/dev/null
+printf "Hadoop:\n" | sudo tee -a time.txt >/dev/null
+printf -- "--------------------------------------------" | sudo tee -a time.txt >/dev/null
+(time (hadoop jar wc.jar WordCount ./input/pg4300.txt output &>/dev/null)) &>> time.txt
+printf -- "--------------------------------------------\n" | sudo tee -a time.txt >/dev/null
+printf "Linux:\n" | sudo tee -a time.txt >/dev/null
+printf -- "--------------------------------------------\n" | sudo tee -a time.txt >/dev/null
+(time (cat ./input/pg4300.txt | tr -c "[:graph:]" "\n" | sort | uniq -c &>/dev/null)) &>> time.txt
 echo "Done."
 
-
 echo "Running WordCount on Hadoop..."
-printf "############################################\n"  >/dev/null
-printf "WordCount execution time on Hadoop\n"  >/dev/null
-printf "############################################\n"  >/dev/null
+printf "############################################\n" | sudo tee -a time.txt >/dev/null
+printf "WordCount execution time on Hadoop\n" | sudo tee -a time.txt >/dev/null
+printf "############################################\n" | sudo tee -a time.txt >/dev/null
 for ((i = 1; i <= 3; i++)); do
     echo "Running test #$i..."
-    printf -- "*******************\n"  >/dev/null
-    printf "Test: #%s\n" "$i" >/dev/null
-    printf -- "*******************\n"  >/dev/null
+    printf -- "*******************\n" | sudo tee -a time.txt >/dev/null
+    printf "Test: #%s\n" "$i" | sudo tee -a time.txt >/dev/null
+    printf -- "*******************\n" | sudo tee -a time.txt >/dev/null
     for dataset in ./input/*.txt; do
         hdfs dfs -rm -r output &>/dev/null
-        printf -- "--------------------------------------------\n"  >/dev/null
-        printf "%s" "$dataset" | sudo tee -a time_hadoop.txt >/dev/null
-        printf -- "--------------------------------------------" >/dev/null
-        (time (hadoop jar wc.jar WordCount "$dataset" output &>/dev/null)) &>> time_hadoop.txt
+        printf -- "--------------------------------------------\n" | sudo tee -a time.txt >/dev/null
+        printf "Sample: %s\n" "$dataset" | sudo tee -a time.txt >/dev/null
+        printf -- "--------------------------------------------" | sudo tee -a time.txt >/dev/null
+        (time (hadoop jar wc.jar WordCount "$dataset" output &>/dev/null)) &>> time.txt
     done
 done
 echo "Done."
 
 echo "Running WordCount on Spark..."
-printf "############################################\n"  >/dev/null
-printf "WordCount execution time on Spark\n" >/dev/null
-printf "############################################\n"  >/dev/null
+printf "############################################\n" | sudo tee -a time.txt >/dev/null
+printf "WordCount execution time on Spark\n" | sudo tee -a time.txt >/dev/null
+printf "############################################\n" | sudo tee -a time.txt >/dev/null
 for ((i = 1; i <= 3; i++)); do
     echo "Running test #$i..."
-    printf -- "*******************\n"  >/dev/null
-    printf "Test: #%s\n" "$i"  >/dev/null
-    printf -- "*******************\n"  >/dev/null
+    printf -- "*******************\n" | sudo tee -a time.txt >/dev/null
+    printf "Test: #%s\n" "$i" | sudo tee -a time.txt >/dev/null
+    printf -- "*******************\n" | sudo tee -a time.txt >/dev/null
     for dataset in ./input/*.txt; do
         hdfs dfs -rm -r output &>/dev/null
-        printf -- "--------------------------------------------\n"  >/dev/null
-        printf "%s\n" "$dataset" | sudo tee -a time_spark.txt >/dev/null
-        printf -- "--------------------------------------------"  >/dev/null
-        (time (spark\-submit --class WordCount wc.jar "$dataset" output &>/dev/null)) &>> time_spark.txt
+        printf -- "--------------------------------------------\n" | sudo tee -a time.txt >/dev/null
+        printf "Sample: %s\n" "$dataset" | sudo tee -a time.txt >/dev/null
+        printf -- "--------------------------------------------" | sudo tee -a time.txt >/dev/null
+        (time (spark\-submit --class WordCount wc.jar "$dataset" output &>/dev/null)) &>> time.txt
     done
 done
 echo "Done."
 
-echo "Execution time successfully saved"
+echo "Execution time successfully saved in time.txt"
 
+echo "Compiling FriendSocialNetwork.java..."
+hadoop com.sun.tools.javac.Main FriendSocialNetwork.java
+sudo jar cf fsn.jar FriendSocialNetwork*.class
+echo "Done."
+
+echo "Running FriendSocialNetwork on Hadoop vs Linux..."
+hadoop jar fsn.jar FriendSocialNetwork ./input/soc-LiveJournal1Adj.txt output_2 &>/dev/null
+echo "Done."
+
+echo "Creating mutual_friend.txt file..."
+touch time.txt
+echo "Done."
+
+echo "Saving list of mutual friend for ids: 924 8941 8942 9019 9020 9021 9022 9990 9992 9993..."
+array=( 924 8941 8942 9019 9020 9021 9022 9990 9992 9993 )
+for i in "${array[@]}"; do
+    cat output_2/part-r-00000 | grep ^$i$'\t' >> mutual_friend.txt
+done
+echo "Done"
