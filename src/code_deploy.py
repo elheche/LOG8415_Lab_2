@@ -4,6 +4,12 @@ from mypy_boto3_codedeploy import CodeDeployClient
 
 
 def create_application(code_deploy: CodeDeployClient, application_name: str) -> str:
+    """
+    create an application using Code Deploy
+    :param code_deploy: Code Deploy Client instance
+    :param application_name: the application name
+    :return: the application's unique ID
+    """
     try:
         print('Creating application...')
         response = code_deploy.create_application(
@@ -20,6 +26,13 @@ def create_application(code_deploy: CodeDeployClient, application_name: str) -> 
 
 
 def create_deployment_group(code_deploy: CodeDeployClient, code_deploy_config: dict, service_role_arn: str) -> str:
+    """
+    create a deployment group using Code Deploy
+    :param code_deploy: Code Deploy Client instance
+    :param code_deploy_config: deployment group's configuration
+    :param service_role_arn: the service role unique arn
+    :return: the deployment group's unique ID
+    """
     try:
         print('Creating deployment group...')
         response = code_deploy.create_deployment_group(
@@ -41,6 +54,13 @@ def create_deployment_group(code_deploy: CodeDeployClient, code_deploy_config: d
 
 
 def create_deployment(code_deploy: CodeDeployClient, bucket: str, code_deploy_config: dict) -> str:
+    """
+    create a deployment using Code Deploy
+    :param code_deploy: Code Deploy Client instance
+    :param bucket: the id of bucket S3 where the source code is located
+    :param code_deploy_config: deployment group's configuration
+    :return: the deployment's unique ID
+    """
     revision = code_deploy_config['Revision']
     revision['s3Location']['bucket'] = bucket
     try:
@@ -61,6 +81,12 @@ def create_deployment(code_deploy: CodeDeployClient, bucket: str, code_deploy_co
 
 
 def delete_application(code_deploy: CodeDeployClient, application_name: str) -> None:
+    """
+    delete an application using Code Deploy
+    :param code_deploy: Code Deploy Client instance
+    :param application_name: the application's unique ID
+    :return: None
+    """
     try:
         print('Deleting application...')
         code_deploy.delete_application(

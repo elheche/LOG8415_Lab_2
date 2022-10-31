@@ -10,6 +10,13 @@ def create_target_group(
         target_group_name: str,
         vpc_id: str
 ) -> str:
+    """
+    create a target group
+    :param elbv2: ElasticLoadBalancing Client instance
+    :param target_group_name: the target group name
+    :param vpc_id: Virtual Private Cloud's unique ID
+    :return: the target group unique Amazon Resource Names
+    """
     try:
         print('Creating target group...')
         response = elbv2.create_target_group(
@@ -36,6 +43,13 @@ def register_targets(
         target_group_arn: str,
         ec2_instance_ids: list[str]
 ) -> None:
+    """
+    register a specific target group
+    :param elbv2: ElasticLoadBalancing Client instance
+    :param target_group_arn: the target group unique Amazon Resource Names
+    :param ec2_instance_ids: EC2 unique ID
+    :return: None
+    """
     try:
         print('Registering targets...')
         elbv2.register_targets(
@@ -54,6 +68,13 @@ def create_application_load_balancer(
         subnets: list[str],
         security_group_ids: list[str]
 ) -> tuple[str, str]:
+    """
+    create an application Load Balancer
+    :param elbv2: ElasticLoadBalancing Client instance
+    :param subnets: subnets for the load balancer instance
+    :param security_group_ids: the security group's unique ID
+    :return: Amazon Resource Names of the application Load Balancer, application Load Balancer's DNS name
+    """
     try:
         print('Creating application load_balancer...')
         response = elbv2.create_load_balancer(
@@ -79,6 +100,13 @@ def create_alb_listener(
         alb_arn: str,
         target_group_arns: list[str]
 ) -> str:
+    """
+    create an application load balancer listener
+    :param elbv2: ElasticLoadBalancing Client instance
+    :param alb_arn: Amazon Resource Names of the application Load Balancer
+    :param target_group_arns: Amazon Resource Names of the target group
+    :return: Amazon Resource Names of the application load balancer listener
+    """
     try:
         print('Creating alb listener...')
         response = elbv2.create_listener(

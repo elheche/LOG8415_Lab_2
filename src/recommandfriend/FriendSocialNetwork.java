@@ -12,18 +12,20 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+/**
+* Class defining the resolution of the Friend Social Network problem using the MapReduce Paradigm.
+* This class define the both Mapper and Reducer class necessary for the Friend Social Network task.
+* <p>
+*/
+
 public class FriendSocialNetwork {
 
-  /*void generatePermutations(List<List<String>> lists, List<String> result, int depth, String current) {
-    if (depth == lists.size()) {
-        result.add(current);
-        return;
-    }
-
-    for (int i = 0; i < lists.get(depth).size(); i++) {
-        generatePermutations(lists, result, depth + 1, current + lists.get(depth).get(i));
-    }
-  }*/
+  /**
+  * Class defining the Mapper class necessary for the Friend Social Network task.
+  * this class override the class Mapper from org.apache.hadoop.mapreduce
+  * and return a couple (Text, IntWritable)
+  * <p>
+  */
 
   public static class GraphMapper
        extends Mapper<Object, Text, Text, Text>{
@@ -34,6 +36,16 @@ public class FriendSocialNetwork {
     private Text zero = new Text("0");
     private Text friendOne = new Text();
     private Text friendTwo = new Text();
+
+    /**
+    * this method implement the logic of the mapping step of MapReduce paradigm
+    * <p>
+    *
+    * @param  key  the input key.
+    * @param  value the input key.
+    * @param  context the object to interact with the rest of the Hadoop system.
+    * @return       collects mapped keys and values.
+    */
 
     public void map(Object key, Text value, Context context
                     ) throws IOException, InterruptedException {
@@ -58,9 +70,25 @@ public class FriendSocialNetwork {
     }
   }
 
+  /**
+  * Class defining the Reducer class necessary for the Friend Social Network task.
+  * this class override the class Reducer from org.apache.hadoop.mapreduce
+  * and return a couple (Text, Text)
+  * <p>
+  */
   public static class SumReducer
        extends Reducer<Text,Text,Text,Text> {
     private Text result = new Text();
+
+    /**
+    * this method implement the logic of the reducing (merging) step of MapReduce paradigm
+    * <p>
+    *
+    * @param  key  the input key (taken from map output).
+    * @param  value the input key (taken from map output).
+    * @param  context the object to interact with the rest of the Hadoop system.
+    * @return       collects mapped keys and values.
+    */
 
     public void reduce(Text key, Iterable<Text> values,
                        Context context
@@ -129,7 +157,6 @@ public class FriendSocialNetwork {
     Job job = Job.getInstance(conf, "friend social network");
     job.setJarByClass(FriendSocialNetwork.class);
     job.setMapperClass(GraphMapper.class);
-    //job.setCombinerClass(SumReducer.class);
     job.setReducerClass(SumReducer.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(Text.class);

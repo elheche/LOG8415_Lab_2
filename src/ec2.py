@@ -6,6 +6,11 @@ from mypy_boto3_ec2 import EC2Client
 
 
 def get_vpc_id(ec2: EC2Client) -> str:
+    """
+    get the Amazon Virtual Private Cloud's unique ID
+    :param ec2: EC2 Client instance
+    :return: Virtual Private Cloud's unique ID
+    """
     try:
         print('Getting vpc id...')
         response = ec2.describe_vpcs()
@@ -19,6 +24,13 @@ def get_vpc_id(ec2: EC2Client) -> str:
 
 
 def create_security_group(ec2: EC2Client, vpc_id: str, group_name: str) -> str:
+    """
+    create a security group
+    :param ec2: EC2 Client instance
+    :param vpc_id: Virtual Private Cloud's unique ID
+    :param group_name: the group's name
+    :return: security group's unique ID
+    """
     try:
         print('Creating security group...')
         response = ec2.create_security_group(
@@ -36,6 +48,12 @@ def create_security_group(ec2: EC2Client, vpc_id: str, group_name: str) -> str:
 
 
 def set_security_group_inbound_rules(ec2: EC2Client, security_group_id: str) -> None:
+    """
+    set the security group's inbound rules
+    :param ec2: EC2 Client instance
+    :param security_group_id: security group's unique ID
+    :return: None
+    """
     try:
         print('Setting inbound rules...')
         ec2.authorize_security_group_ingress(
@@ -61,6 +79,12 @@ def set_security_group_inbound_rules(ec2: EC2Client, security_group_id: str) -> 
 
 
 def create_key_pair(ec2: EC2Client, key_name: str) -> str:
+    """
+    create key pair of EC2 instance
+    :param ec2: EC2 Client instance
+    :param key_name: key unique name
+    :return: key pair id
+    """
     try:
         print('Creating key pair...')
         with open('ec2_keypair.pem', 'w') as file:
