@@ -4,14 +4,14 @@ import jmespath
 import paramiko
 import shutil
 import os
+from main import load_aws_data
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))  # This is your Project Root
 
 FILE_NAME_r = "recommandfriend"
 FILE_NAME = "wordcount"
 PATH = os.path.join(ROOT_DIR, FILE_NAME)
-TO_RUN = 'setup.sh'
-TO_RUN_r = 'run.sh'
+TO_RUN = './setup.sh'
 ZIP_FILE = shutil.make_archive(FILE_NAME, 'zip', FILE_NAME)
 ZIP_FILE_r = shutil.make_archive(FILE_NAME_r, 'zip', FILE_NAME_r)
 ZIP_FILE_NAME = FILE_NAME + '.zip'
@@ -60,49 +60,44 @@ def get_all_instance_ip() -> int:
     return public_dns_ip[0]
 
 
-def ssh_connexion(ssh, instance_ip, retries) -> None:
+def ssh_connexion(ssh, instance_ip, retries) -> bool:
     if retries > 3:
         return False
+
     privkey = paramiko.RSAKey.from_private_key_file(
         'ec2_keypair.pem')
     interval = 5
     try:
         retries += 1
-        print('SSH into the instance: {}'.format(instance_ip))
+        print(f'SSH into the instance: {instance_ip}')
         ssh.connect(hostname=instance_ip,
                     username='ubuntu', pkey=privkey)
         sftp = ssh.open_sftp()
-        # Upload zip file
-        upload = sftp.put(ZIP_FILE, '/home/ubuntu/' + ZIP_FILE_NAME)
-        upload = sftp.put(ZIP_FILE_r, '/home/ubuntu/' + ZIP_FILE_NAME_r)
+        # Upload files
+        sftp.put('./setup.sh', '/home/ubuntu/setup.sh')
+        sftp.put('./wordcount/WordCount.java', '/home/ubuntu/WordCount.java')
+        sftp.put('./recommandfriend/FriendSocialNetwork.java', '/home/ubuntu/FriendSocialNetwork.java')
+        sftp.put('./recommandfriend/soc-LiveJournal1Adj.txt', '/home/ubuntu/soc-LiveJournal1Adj.txt')
         return True
     except Exception as e:
         print(e)
         time.sleep(interval)
-        print('Retrying SSH connection to {}'.format(instance_ip))
+        print(f'Retrying SSH connection to {instance_ip}')
         ssh_connexion(ssh, instance_ip, retries)
+        return False
 
 
 def run_command() -> None:
-    copy_key_pair()
     c = paramiko.SSHClient()
     c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    public_ip = get_all_instance_ip()
-    ssh_connexion(c, public_ip, 0)
-    commands = [
-        'sudo apt-get update -y',
-        'sudo apt install unzip',
-        'unzip ' + FILE_NAME,
-        'unzip ' + FILE_NAME_r,
-        'bash sample.sh',
-        'chmod u+x ./' + TO_RUN,
-        'chmod u+x ./' + TO_RUN_r,
-        './' + TO_RUN,
-        './' + TO_RUN_r
-        # 'sudo scp -i ec2_keypair.pem ubuntu@' + str(get_all_instance_ip()) + ':/home/ubuntu/time.txt .src/wordcount'
-    ]
-    for command in commands:
-        print("running command: {}".format(command))
-        stdin, stdout, stderr = c.exec_command(command)
-        print('stdout:', stdout.read())
-        print('stderr:', stderr.read())
+    ec2_public_ipv4 = load_aws_data('./aws_data.json')['EC2InstancePublicIPv4Address']
+    ssh_connexion(c, ec2_public_ipv4, 0)
+
+    c.exec_command(f'chmod +x {TO_RUN}')
+    stdin, stdout, stderr = c.exec_command(TO_RUN, get_pty=True)
+
+    for line in iter(stdout.readline, ""):
+        print(line, end="")
+
+
+
