@@ -1,96 +1,63 @@
+import sys
 import time
-import boto3
-import jmespath
 import paramiko
-import shutil
-import os
-from main import load_aws_data
-
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))  # This is your Project Root
-
-FILE_NAME_r = "recommandfriend"
-FILE_NAME = "wordcount"
-PATH = os.path.join(ROOT_DIR, FILE_NAME)
-TO_RUN = './setup.sh'
-KEY_SOURCE = 'ec2_keypair.pem'
-KEY_DESTINATION = 'wordcount/'
-KEY_DESTINATION_r = 'recommandfriend/'
+from pathlib import Path
+from paramiko.client import SSHClient
+from config import *
 
 
-def copy_key_pair() -> None:
+def ssh_connect(ssh_client: SSHClient, ec2_instance_public_ipv4_address: str) -> None:
+    max_attempt = 10
+    attempt = 1
+
+    while True:
+        try:
+            print(f'Establishing an SSH connection to EC2 Instance... \nAttempt: {attempt}')
+            ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            private_key = paramiko.RSAKey.from_private_key_file(SSH_CONFIG['KeyPairFile'])
+            ssh_client.connect(
+                hostname=ec2_instance_public_ipv4_address,
+                username=SSH_CONFIG['EC2UserName'],
+                pkey=private_key
+            )
+        except Exception as e:
+            if attempt < max_attempt:
+                attempt += 1
+                time.sleep(5)  # wait 5s between each attempt.
+            else:
+                print(e)
+                sys.exit(1)
+        else:
+            print(f"SSH connection successfully established to EC2 instance:\n{ec2_instance_public_ipv4_address}")
+            break
+
+
+def ssh_upload(ssh_client: SSHClient, local_path: str, remote_path: str) -> None:
     try:
-        shutil.copy2(KEY_SOURCE, KEY_DESTINATION)
-        print("File copied successfully.")
-        time.sleep(5)
-
-    # If source and destination are same
-    except shutil.SameFileError:
-        print("Source and destination represents the same file.")
-
-    # If destination is a directory.
-    except IsADirectoryError:
-        print("Destination is a directory.")
-
-    # If there is any permission issue
-    except PermissionError:
-        print("Permission denied.")
-
-    # For other errors
-    except Exception as e:
-        print("Error occurred while copying file.{}".format(e))
-
-
-def get_all_instance_ip() -> int:
-    client = boto3.client('ec2')
-    response = client.describe_instances(Filters=[
-        {
-            'Name': 'instance-state-name',
-            'Values': [
-                'running',
-            ]
-        },
-    ], )
-
-    public_dns_ip = jmespath.search("Reservations[].Instances[].PublicIpAddress", response)
-    print(public_dns_ip[0])
-    return public_dns_ip[0]
-
-
-def ssh_connexion(ssh, instance_ip, retries) -> bool:
-    if retries > 3:
-        return False
-
-    privkey = paramiko.RSAKey.from_private_key_file(
-        'ec2_keypair.pem')
-    interval = 5
-    try:
-        retries += 1
-        print(f'SSH into the instance: {instance_ip}')
-        ssh.connect(hostname=instance_ip,
-                    username='ubuntu', pkey=privkey)
-        sftp = ssh.open_sftp()
-        # Upload files
-        sftp.put('./setup.sh', '/home/ubuntu/setup.sh')
-        sftp.put('./wordcount/WordCount.java', '/home/ubuntu/WordCount.java')
-        sftp.put('./recommandfriend/FriendSocialNetwork.java', '/home/ubuntu/FriendSocialNetwork.java')
-        sftp.put('./recommandfriend/soc-LiveJournal1Adj.txt', '/home/ubuntu/soc-LiveJournal1Adj.txt')
-        return True
+        print(f'Uploading a file to EC2 Instance...')
+        sftp_client = ssh_client.open_sftp()
+        sftp_client.put(local_path, remote_path)
     except Exception as e:
         print(e)
-        time.sleep(interval)
-        print(f'Retrying SSH connection to {instance_ip}')
-        ssh_connexion(ssh, instance_ip, retries)
-        return False
+        sys.exit(1)
+    else:
+        sftp_client.close()
+        print(f'File successfully uploaded to EC2 instance:\n{Path(local_path).name}')
 
 
-def run_command() -> None:
-    c = paramiko.SSHClient()
-    c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ec2_public_ipv4 = load_aws_data('./aws_data.json')['EC2InstancePublicIPv4Address']
-    ssh_connexion(c, ec2_public_ipv4, 0)
+def ssh_run_commands(ec2_instance_public_ipv4_address: str) -> None:
+    ssh_client = paramiko.SSHClient()
 
-    c.exec_command(f'chmod +x {TO_RUN}')
-    stdin, stdout, stderr = c.exec_command(TO_RUN, get_pty=True)
+    ssh_connect(ssh_client, ec2_instance_public_ipv4_address)
+
+    for local_path in SSH_CONFIG['FilesToUpload']:
+        remote_path = str(Path(SSH_CONFIG['RemoteDirectory']).joinpath(Path(local_path).name))
+        ssh_upload(ssh_client, local_path, remote_path)
+
+    _, stdout, stderr = ssh_client.exec_command(
+        f"chmod +x {SSH_CONFIG['ScriptToExecute']} && {SSH_CONFIG['ScriptToExecute']}",
+        get_pty=True
+    )
 
     for line in iter(stdout.readline, ""):
         print(line, end="")
