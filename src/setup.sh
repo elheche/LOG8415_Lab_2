@@ -1,7 +1,32 @@
 #!/bin/bash
 
-echo "Installing dependencies..."
+# A BASH function to wait for 'apt-get update' to complete and release all locks,
+# otherwise 'apt-get install' may fail
+apt_get_wait() {
+    echo "Waiting 'apt-get update' to complete and release all locks..."
+    while sudo fuser /var/lib/dpkg/lock &>/dev/null; do
+        sleep 1
+    done
+
+    while sudo fuser /var/lib/apt/lists/lock &>/dev/null; do
+        sleep 1
+    done
+
+    if [ -f /var/log/unattended-upgrades/unattended-upgrades.log ]; then
+        while sudo fuser /var/log/unattended-upgrades/unattended-upgrades.log &>/dev/null; do
+            sleep 1
+        done
+    fi
+    echo "Done."
+}
+
+echo "Updating package list..."
 sudo apt-get update -y >/dev/null
+echo "Done."
+
+apt_get_wait
+
+echo "Installing dependencies..."
 sudo apt-get install default-jdk -y >/dev/null
 echo "Done."
 
@@ -60,8 +85,8 @@ sudo curl -L --compressed http://www.gutenberg.ca/ebooks/delamare-myfanwy/delama
 sudo curl -L --compressed http://www.gutenberg.ca/ebooks/delamare-penny/delamare-penny-00-t.txt -o data/delamare-penny-00-t.txt 2>/dev/null
 echo "Done."
 
-echo "Copying friend social network data..."
-cp soc-LiveJournal1Adj.txt data
+echo "Moving friend social network dataset to data directory..."
+mv soc-LiveJournal1Adj.txt data
 echo "Done."
 
 echo "Copying datasets from data to input directory..."
@@ -79,11 +104,11 @@ printf "############################################\n" | sudo tee -a time.txt >
 printf -- "--------------------------------------------\n" | sudo tee -a time.txt >/dev/null
 printf "Hadoop:\n" | sudo tee -a time.txt >/dev/null
 printf -- "--------------------------------------------" | sudo tee -a time.txt >/dev/null
-(time (hadoop jar wc.jar WordCount ./input/pg4300.txt output &>/dev/null)) &>> time.txt
+(time (hadoop jar wc.jar WordCount ./input/pg4300.txt output &>/dev/null)) &>>time.txt
 printf -- "--------------------------------------------\n" | sudo tee -a time.txt >/dev/null
 printf "Linux:\n" | sudo tee -a time.txt >/dev/null
-printf -- "--------------------------------------------\n" | sudo tee -a time.txt >/dev/null
-(time (cat ./input/pg4300.txt | tr -c "[:graph:]" "\n" | sort | uniq -c &>/dev/null)) &>> time.txt
+printf -- "--------------------------------------------" | sudo tee -a time.txt >/dev/null
+(time (tr <./input/pg4300.txt -c "[:graph:]" "\n" | sort | uniq -c &>/dev/null)) &>>time.txt
 echo "Done."
 
 echo "Running WordCount on Hadoop..."
@@ -96,11 +121,14 @@ for ((i = 1; i <= 3; i++)); do
     printf "Test: #%s\n" "$i" | sudo tee -a time.txt >/dev/null
     printf -- "*******************\n" | sudo tee -a time.txt >/dev/null
     for dataset in ./input/*.txt; do
+        if [[ "$dataset" == "./input/pg4300.txt" || "$dataset" == "./input/soc-LiveJournal1Adj.txt" ]]; then
+            continue
+        fi
         hdfs dfs -rm -r output &>/dev/null
         printf -- "--------------------------------------------\n" | sudo tee -a time.txt >/dev/null
-        printf "Sample: %s\n" "$dataset" | sudo tee -a time.txt >/dev/null
+        printf "Dataset: %s\n" "$dataset" | sudo tee -a time.txt >/dev/null
         printf -- "--------------------------------------------" | sudo tee -a time.txt >/dev/null
-        (time (hadoop jar wc.jar WordCount "$dataset" output &>/dev/null)) &>> time.txt
+        (time (hadoop jar wc.jar WordCount "$dataset" output &>/dev/null)) &>>time.txt
     done
 done
 echo "Done."
@@ -115,11 +143,14 @@ for ((i = 1; i <= 3; i++)); do
     printf "Test: #%s\n" "$i" | sudo tee -a time.txt >/dev/null
     printf -- "*******************\n" | sudo tee -a time.txt >/dev/null
     for dataset in ./input/*.txt; do
+        if [[ "$dataset" == "./input/pg4300.txt" || "$dataset" == "./input/soc-LiveJournal1Adj.txt" ]]; then
+            continue
+        fi
         hdfs dfs -rm -r output &>/dev/null
         printf -- "--------------------------------------------\n" | sudo tee -a time.txt >/dev/null
-        printf "Sample: %s\n" "$dataset" | sudo tee -a time.txt >/dev/null
+        printf "Dataset: %s\n" "$dataset" | sudo tee -a time.txt >/dev/null
         printf -- "--------------------------------------------" | sudo tee -a time.txt >/dev/null
-        (time (spark\-submit --class WordCount wc.jar "$dataset" output &>/dev/null)) &>> time.txt
+        (time (spark-submit --class WordCount wc.jar "$dataset" output &>/dev/null)) &>>time.txt
     done
 done
 echo "Done."
@@ -132,7 +163,8 @@ sudo jar cf fsn.jar FriendSocialNetwork*.class
 echo "Done."
 
 echo "Running FriendSocialNetwork on Hadoop..."
-hadoop jar fsn.jar FriendSocialNetwork ./input/soc-LiveJournal1Adj.txt output_2 &>/dev/null
+hdfs dfs -rm -r output &>/dev/null
+hadoop jar fsn.jar FriendSocialNetwork ./input/soc-LiveJournal1Adj.txt output &>/dev/null
 echo "Done."
 
 echo "Creating mutual_friend.txt file..."
@@ -140,8 +172,8 @@ touch time.txt
 echo "Done."
 
 echo "Saving list of mutual friend for ids: 924 8941 8942 9019 9020 9021 9022 9990 9992 9993..."
-array=( 924 8941 8942 9019 9020 9021 9022 9990 9992 9993 )
+array=(924 8941 8942 9019 9020 9021 9022 9990 9992 9993)
 for i in "${array[@]}"; do
-    cat output_2/part-r-00000 | grep ^$i$'\t' >> mutual_friend.txt
+    grep <./output/part-r-00000 ^"$i"$'\t' >>mutual_friend.txt
 done
 echo "Done"
