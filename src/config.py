@@ -37,3 +37,16 @@ EC2_CONFIG = {
         ]
     }
 }
+
+SSH_CONFIG = {
+    'EC2UserName': 'ubuntu',
+    'KeyPairFile': 'ec2_keypair.pem',
+    'FilesToUpload': [
+        './setup.sh',
+        './wordcount/WordCount.java',
+        './recommandfriend/FriendSocialNetwork.java',
+        './recommandfriend/soc-LiveJournal1Adj.txt'
+    ],
+    'RemoteDirectory': '/home/ubuntu/',
+    'ScriptToExecute': './setup.sh'
+}
