@@ -1,7 +1,7 @@
 EC2_CONFIG = {
     'Common': {
         'ServiceName': 'ec2',
-        'ImageId': 'ami-0ee23bfc74a881de5',  # Ubuntu, 18.04 LTS, 64-bit (x86) (CodeDeploy Agent preinstalled)
+        'ImageId': 'ami-08c40ec9ead489470',  # Ubuntu, 22.04 LTS, 64-bit (x86)
         'KeyPairName': 'log8415_lab1_kp',
         'SecurityGroups': ['log8415_lab1_sg'],
         'InstanceCount': 1,
