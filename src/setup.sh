@@ -3,7 +3,6 @@
 # A BASH function to wait for 'apt-get update' to complete and release all locks,
 # otherwise 'apt-get install' may fail
 apt_get_wait() {
-    echo "Waiting 'apt-get update' to complete and release all locks..."
     while sudo fuser /var/lib/dpkg/lock &>/dev/null; do
         sleep 1
     done
@@ -12,22 +11,38 @@ apt_get_wait() {
         sleep 1
     done
 
-    if [ -f /var/log/unattended-upgrades/unattended-upgrades.log ]; then
+    if [[ -f /var/log/unattended-upgrades/unattended-upgrades.log ]]; then
         while sudo fuser /var/log/unattended-upgrades/unattended-upgrades.log &>/dev/null; do
             sleep 1
         done
     fi
-    echo "Done."
+    # Unhold all held packages
+    if [[ -n $(sudo apt-mark showhold) ]]; then
+        sudo apt-mark unhold "$(sudo apt-mark showhold)"
+    fi
+}
+
+install_dependencies() {
+    for ((i = 1; i <= 10; i++)); do
+        echo "Attempt: $i"
+        if sudo apt-get install default-jdk -y >/dev/null; then
+            break
+        fi
+        sleep 5
+    done
 }
 
 echo "Updating package list..."
 sudo apt-get update -y >/dev/null
+sudo apt-get autoremove -y >/dev/null
 echo "Done."
 
+echo "Waiting 'apt-get update' to complete and release all locks..."
 apt_get_wait
+echo "Done."
 
 echo "Installing dependencies..."
-sudo apt-get install default-jdk -y >/dev/null
+install_dependencies
 echo "Done."
 
 echo "Setting environment variables for java, hadoop and spark..."
