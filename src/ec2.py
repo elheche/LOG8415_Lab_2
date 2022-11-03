@@ -8,7 +8,8 @@ from mypy_boto3_ec2 import EC2Client
 def get_vpc_id(ec2: EC2Client) -> str:
     """
     get the Amazon Virtual Private Cloud's unique ID
-    :param ec2: EC2 Client instance
+
+    :param ec2: EC2 Client
     :return: Virtual Private Cloud's unique ID
     """
     try:
@@ -26,7 +27,8 @@ def get_vpc_id(ec2: EC2Client) -> str:
 def create_security_group(ec2: EC2Client, vpc_id: str, group_name: str) -> str:
     """
     create a security group
-    :param ec2: EC2 Client instance
+
+    :param ec2: EC2 Client
     :param vpc_id: Virtual Private Cloud's unique ID
     :param group_name: the group's name
     :return: security group's unique ID
@@ -50,7 +52,8 @@ def create_security_group(ec2: EC2Client, vpc_id: str, group_name: str) -> str:
 def set_security_group_inbound_rules(ec2: EC2Client, security_group_id: str) -> None:
     """
     set the security group's inbound rules
-    :param ec2: EC2 Client instance
+
+    :param ec2: EC2 Client
     :param security_group_id: security group's unique ID
     :return: None
     """
@@ -81,7 +84,8 @@ def set_security_group_inbound_rules(ec2: EC2Client, security_group_id: str) -> 
 def create_key_pair(ec2: EC2Client, key_name: str) -> str:
     """
     create key pair of EC2 instance
-    :param ec2: EC2 Client instance
+
+    :param ec2: EC2 Client
     :param key_name: key unique name
     :return: key pair id
     """
@@ -100,6 +104,15 @@ def create_key_pair(ec2: EC2Client, key_name: str) -> str:
 
 
 def launch_ec2_instance(ec2: EC2Client, ec2_config: dict, instance_tag_id: str) -> str:
+    """
+    launch an ec2 instance
+
+    :param ec2: EC2 Client
+    :param ec2_config: EC2 instance configuration
+    :param instance_tag_id: EC2 instance id tag
+    :return: EC2 instance unique ID
+    """
+
     # Add a unique tag to each ec2 instance
     ec2_config['TagSpecifications'][0]['Tags'][1]['Value'] = instance_tag_id
     try:
@@ -130,6 +143,13 @@ def launch_ec2_instance(ec2: EC2Client, ec2_config: dict, instance_tag_id: str) 
 
 
 def wait_until_all_ec2_instance_are_running(ec2: EC2Client, instance_ids: list[str]) -> None:
+    """
+    wait until EC2 instance state change to "running"
+
+    :param ec2: EC2 Client
+    :param instance_ids: EC2 instance ids to wait
+    :return: None
+    """
     try:
         print('Waiting until all ec2 instances are running...')
         waiter = ec2.get_waiter('instance_running')
@@ -144,64 +164,18 @@ def wait_until_all_ec2_instance_are_running(ec2: EC2Client, instance_ids: list[s
         print('All EC2 instances are now running.')
 
 
-def get_subnet_ids(ec2: EC2Client, vpc_id: str, availability_zone: list[str]) -> list[str]:
-    try:
-        print('Getting subnet ids...')
-        response = ec2.describe_subnets(
-            Filters=[
-                {
-                    'Name': 'vpc-id',
-                    'Values': [vpc_id],
-                },
-                {
-                    'Name': 'availability-zone',
-                    'Values': availability_zone,
-                }
-            ]
-        )
-    except Exception as e:
-        print(e)
-        sys.exit(1)
-    else:
-        subnet_ids = [subnet['SubnetId'] for subnet in response['Subnets']]
-        print(f'Subnet ids obtained successfully.\n{subnet_ids}')
-        return subnet_ids
-
-
-def add_tag_to_ec2_instance(ec2: EC2Client, ec2_instance_id: str, tag: dict) -> None:
-    try:
-        print('Adding a tag to an ec2 instance...')
-        ec2.create_tags(
-            Resources=[ec2_instance_id],
-            Tags=[
-                {
-                    'Key': tag['Key'],
-                    'Value': tag['Value']
-                }
-            ]
-        )
-    except Exception as e:
-        print(e)
-        sys.exit(1)
-    else:
-        print(f'Tag successfully added to ec2 instance {ec2_instance_id}.')
-
-
-def reboot_all_ec2_instances(ec2: EC2Client, ec2_instance_ids: list[str]) -> None:
-    try:
-        print('Rebooting all ec2 instances...')
-        ec2.reboot_instances(InstanceIds=ec2_instance_ids)
-    except Exception as e:
-        print(e)
-        sys.exit(1)
-    else:
-        print(f'All ec2 instances rebooted successfully.\n{ec2_instance_ids}')
-
-
 def terminate_ec2_instances(
         ec2: EC2Client,
         ec2_instance_ids: list[str]
 ) -> None:
+    """
+    terminate an EC2 instance
+
+    :param ec2: EC2 Client
+    :param ec2_instance_ids: EC2 instance ids to terminate
+    :return: None
+    """
+
     try:
         print('Terminating EC2 instances...')
         ec2.terminate_instances(InstanceIds=ec2_instance_ids)
@@ -213,6 +187,14 @@ def terminate_ec2_instances(
 
 
 def delete_key_pair(ec2: EC2Client, key_pair_id: str) -> None:
+    """
+    delete a key pair
+
+    :param ec2: EC2 Client
+    :param key_pair_id: key pair id to delete
+    :return: None
+    """
+
     try:
         print('Deleting key pair...')
         ec2.delete_key_pair(
@@ -226,17 +208,25 @@ def delete_key_pair(ec2: EC2Client, key_pair_id: str) -> None:
 
 
 def delete_security_group(ec2: EC2Client, security_group_id: str) -> None:
-    MAX_ATTEMPT = 10
+    """
+    delete a security group
+
+    :param ec2: EC2 Client
+    :param security_group_id: security group id to delete
+    :return: None
+    """
+
+    max_attempt = 10
     attempt = 1
 
-    while (True):
+    while True:
         try:
             print(f'Deleting security group...\nAttempt: {attempt}')
             ec2.delete_security_group(
                 GroupId=security_group_id
             )
         except ClientError as e:
-            if (e.response['Error']['Code'] == 'DependencyViolation' and attempt < MAX_ATTEMPT):
+            if e.response['Error']['Code'] == 'DependencyViolation' and attempt < max_attempt:
                 attempt += 1
                 time.sleep(10)  # wait 10s between each attempt.
             else:
@@ -251,6 +241,14 @@ def delete_security_group(ec2: EC2Client, security_group_id: str) -> None:
 
 
 def wait_until_all_ec2_instances_are_terminated(ec2: EC2Client, instance_ids: list[str]) -> None:
+    """
+    wait until EC2 instance state change to "terminated"
+
+    :param ec2: EC2 Client
+    :param instance_ids: EC2 instance ids to wait
+    :return: None
+    """
+
     try:
         print('Waiting until all ec2 instances are terminated...')
         waiter = ec2.get_waiter('instance_terminated')
@@ -266,6 +264,14 @@ def wait_until_all_ec2_instances_are_terminated(ec2: EC2Client, instance_ids: li
 
 
 def get_ec2_instance_public_ipv4_address(ec2: EC2Client, ec2_instance_id: str) -> str:
+    """
+    get the EC2 instance's public IPv4 address
+
+    :param ec2: EC2 Client
+    :param ec2_instance_id: EC2 instance id
+    :return: EC2 instance public IPv4 address
+    """
+
     try:
         print('Getting ec2 instance public ipv4 address...')
         response = ec2.describe_instances(

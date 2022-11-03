@@ -7,6 +7,14 @@ from config import *
 
 
 def ssh_connect(ssh_client: SSHClient, ec2_instance_public_ipv4_address: str) -> None:
+    """
+    connect to an EC2 instance through SSH
+
+    :param ssh_client: The SSH client
+    :param ec2_instance_public_ipv4_address: The public IPv4 address of the EC2 instance to which we are connecting
+    :return: None
+    """
+
     max_attempt = 10
     attempt = 1
 
@@ -33,6 +41,15 @@ def ssh_connect(ssh_client: SSHClient, ec2_instance_public_ipv4_address: str) ->
 
 
 def ssh_upload(ssh_client: SSHClient, local_path: str, remote_path: str) -> None:
+    """
+    upload a file to an EC2 instance through SSH
+
+    :param ssh_client: The SSH client
+    :param local_path: The file path to upload from the local machine
+    :param remote_path: The file path to which it is uploaded on the EC2 instance
+    :return: None
+    """
+
     try:
         print(f'Uploading a file to EC2 Instance...')
         sftp_client = ssh_client.open_sftp()
@@ -46,6 +63,12 @@ def ssh_upload(ssh_client: SSHClient, local_path: str, remote_path: str) -> None
 
 
 def ssh_run_commands(ec2_instance_public_ipv4_address: str) -> None:
+    """
+    connect to an EC2 instance, upload WordCount and Social Network files, and run the setup script on it via SSH
+
+    :param ec2_instance_public_ipv4_address: The public IPv4 address of the EC2 instance to which we are connecting
+    :return: None
+    """
     ssh_client = paramiko.SSHClient()
 
     ssh_connect(ssh_client, ec2_instance_public_ipv4_address)

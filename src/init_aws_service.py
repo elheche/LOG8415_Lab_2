@@ -12,7 +12,8 @@ def create_aws_service(
         aws_session_token: str = None
 ):
     """
-    This function creates the AWS service
+    create an AWS service
+
     :param aws_service_name: The name of the service
     :param aws_region_name: The region name
     :param aws_access_key_id: The AWS client access key

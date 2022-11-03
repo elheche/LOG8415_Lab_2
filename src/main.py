@@ -1,16 +1,14 @@
 import argparse
-from pathlib import Path
-from constants import *
+import json
 from ec2 import *
 from init_aws_service import *
-from s3 import *
-import sys
 from ssh_run_command import *
+
 
 def main() -> None:
     """
-    This function runs the whole experience : Creates and configures the AWS EC2 instances and runs the map reduce experiences
-    (WordCount and Social network)
+    this function runs the whole experience : creates and configures the AWS EC2 instances and runs the map reduce experiences
+    (WordCount and Social Network)
     """
     ###################################################################################################################
     #                                    Setting program arguments
@@ -109,19 +107,21 @@ def main() -> None:
     # Export aws_data to aws_data.json file (needed to execute -r/--reset command)
     save_aws_data(aws_data, 'aws_data.json')
 
+    ###################################################################################################################
+    #                                    Running commands via SSH
+    ###################################################################################################################
 
-###################################################################################################################
-#                                    Running commands via SSH
-###################################################################################################################
-
-    run_command()
+    # Copy the necessary files and run setup.sh on the created EC2 instance
+    ssh_run_commands(ec2_instance_public_ipv4_address)
 
 
 def save_aws_data(aws_data: dict, path: str) -> None:
     """
-    Saves the credentials of the AWS client for the next iterations
-    :param aws_data: The data representing the credentials necessary to connect to an AWS service
+    export AWS data to a json file needed to run a reset command
+
+    :param aws_data: The data of aws elements created during program execution
     :param path: The path where to save the data
+    :returns: None
     """
     try:
         print('Saving aws data...')
@@ -136,9 +136,10 @@ def save_aws_data(aws_data: dict, path: str) -> None:
 
 def load_aws_data(path: str) -> dict:
     """
-    Loads the credentials necessary for logging to an AWS client
+    load AWS data from a json file
+
     :param path: The path where to find the data
-    :return: the AWS credentials necessary for the AWS connection
+    :return: The aws data as a dictionary
     """
     try:
         print('Loading aws data...')
@@ -154,7 +155,8 @@ def load_aws_data(path: str) -> dict:
 
 def reset(ec2: EC2Client) -> None:
     """
-    Resets your AWS account by terminating and deleting all the lements created in the function main
+    Reset your AWS account by terminating and deleting all the elements created during program execution
+
     :param ec2: The AWS EC2 client to be reset
     """
     data_exists = Path('aws_data.json').is_file()
