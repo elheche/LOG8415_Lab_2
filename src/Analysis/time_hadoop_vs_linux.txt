@@ -1,2 +1,0 @@
-Book,real_time,user_time,sys_time
-pg4300.txt,6.070,9.848,0.565

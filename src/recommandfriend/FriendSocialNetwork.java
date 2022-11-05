@@ -54,7 +54,6 @@ public class FriendSocialNetwork {
       friendOne.set(itr.nextToken());
       while (itr.hasMoreTokens()) {
         friendTwo.set(itr.nextToken());
-        //System.out.println("couple :("+ friendOne + "," + friendTwo + "_" + zero.toString() +")");
         context.write(friendOne, new Text(friendTwo + "_" + zero));
         mutualFriends.add(friendTwo.toString());
       }
@@ -63,8 +62,6 @@ public class FriendSocialNetwork {
         for (int j=i+1; j < mutualFriends.size(); j++){
             context.write(new Text(mutualFriends.get(i)), new Text(mutualFriends.get(j) + "_" + one));
             context.write(new Text(mutualFriends.get(j)), new Text(mutualFriends.get(i) + "_" + one));
-            //System.out.println("couple :("+ mutualFriends.get(i) + "," + mutualFriends.get(j) + "_" + one.toString() +")");
-            //System.out.println("couple :("+ mutualFriends.get(j) + "," + mutualFriends.get(i) + "_" + one.toString() +")");
         }
       }
     }
@@ -97,10 +94,7 @@ public class FriendSocialNetwork {
       Hashtable<String, Integer> mutualFriendsDict = new Hashtable<String, Integer>();
       for (Text val : values) {
         String[] elements = val.toString().split("_");
-        //System.out.println("the input value is " + val.toString() + "|");
         if (elements.length > 1){
-            //System.out.println(elements[0]);
-            //System.out.println(elements[1]);
             String friendTwo = elements[0];
             int relationship = Integer.parseInt(elements[1]);
             if (mutualFriendsDict.containsKey(friendTwo)){
@@ -117,11 +111,6 @@ public class FriendSocialNetwork {
         }
       }
 
-     /*Set<Map.Entry<String, Integer>> entries = mutualFriendsDict.entrySet();
-      for(Map.Entry<String, Integer> entry : entries ){
-        System.out.println( entry.getKey() + "->" + entry.getValue() );
-      }*/
-
       //get all the entries from the hashtable and put it in a List
       List<Map.Entry<String, Integer>> list = new ArrayList<Entry<String, Integer>>(mutualFriendsDict.entrySet());
       //sort the entries based on the value by custom Comparator
@@ -131,14 +120,9 @@ public class FriendSocialNetwork {
         }
       });
 
-      /*for(Map.Entry<String, Integer> entry : list){
-        System.out.println( entry.getKey() + "->" + entry.getValue() );
-      }*/
-
       String output = "\t";
       for( Map.Entry<String, Integer> entry : list){
         if (entry.getValue() != 0){
-            //output = output + entry.getKey() + "(" + entry.getValue().toString() + "),";
             output = output + entry.getKey() + ",";
         } else {
             break;
@@ -146,7 +130,6 @@ public class FriendSocialNetwork {
       }
 
       output = output.substring(0, output.length() - 1);
-      //System.out.println("the result is " + output + "|");
       result = new Text(output);
       context.write(key, result);
     }
